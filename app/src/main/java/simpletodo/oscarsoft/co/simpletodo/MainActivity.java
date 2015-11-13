@@ -6,6 +6,9 @@ import java.util.ArrayList;
 
 import org.apache.commons.io.FileUtils;
 
+import android.app.Activity;
+import android.content.DialogInterface;
+import android.content.Intent;
 import android.os.Bundle;
 import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.Snackbar;
@@ -38,6 +41,7 @@ public class MainActivity extends AppCompatActivity {
         itemsAdapter = new ArrayAdapter<>(this, android.R.layout.simple_list_item_1, items);
         lvItems.setAdapter(itemsAdapter);
         setupListViewListener();
+        setupItemEditListener();
     }
 
     public void onAddItem(View v) {
@@ -60,6 +64,30 @@ public class MainActivity extends AppCompatActivity {
                     }
                 }
         );
+    }
+
+    private void setupItemEditListener() {
+        lvItems.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+            public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+                Intent i = new Intent(MainActivity.this, EditItemActivity.class);
+                i.putExtra(EditItemActivity.L_TASK_INDEX, ""+position);
+                i.putExtra(EditItemActivity.L_TASK_NAME, items.get(position));
+                startActivityForResult(i, 1);
+            }
+        });
+    }
+
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+        if (requestCode == 1) {
+            if (resultCode == Activity.RESULT_OK) {
+                int taskIndex = new Integer(data.getStringExtra(EditItemActivity.L_TASK_INDEX));
+                String newTask = data.getStringExtra(EditItemActivity.L_TASK_NAME);
+                items.set(taskIndex, newTask);
+                itemsAdapter.notifyDataSetChanged();
+                writeItems();
+            }
+        }
     }
 
     private void readItems() {
