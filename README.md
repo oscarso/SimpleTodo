@@ -1,6 +1,7 @@
 SimpleTodo
 ==========
 A simple TODO Android Application which allows user to add or remove TODO tasks.
+User may also modify any existing task in the list.
 
 
 Why SimpleTodo ?
