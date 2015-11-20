@@ -1,4 +1,4 @@
-package simpletodo.oscarsoft.co.simpletodo;
+package co.oscarsoft.simpletodo;
 
 import android.app.Application;
 import android.test.ApplicationTestCase;
