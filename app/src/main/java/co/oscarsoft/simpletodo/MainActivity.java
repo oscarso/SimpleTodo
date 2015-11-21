@@ -21,9 +21,9 @@ import android.widget.ListView;
 import simpletodo.oscarsoft.co.simpletodo.R;
 
 
-public class MainActivity extends AppCompatActivity {
-    final static String filename = "todo.txt";
 
+
+public class MainActivity extends AppCompatActivity {
     ArrayList<String>       items;
     ArrayList<Task>         tasks;
     ArrayAdapter<String>    itemsAdapter;
@@ -90,13 +90,6 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private void readItems() {
-        /*File filesDir = getFilesDir();
-        File todoFile = new File(filesDir, MainActivity.filename);
-        try {
-            items = new ArrayList<String>(FileUtils.readLines(todoFile));
-        } catch (IOException ioe) {
-            items = new ArrayList<String>();
-        }*/
         TaskDB taskDB = TaskDB.getInstance(MainActivity.this);
         tasks = taskDB.getTasks();
         if (tasks.size() > 0) {
@@ -111,15 +104,19 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private void writeItems() {
-        //File filesDir = getFilesDir();
-        //File todoFile = new File(filesDir, MainActivity.filename);
+        if (items.size() == 0) {
+            return;
+        }
+
         try {
-            //FileUtils.writeLines(todoFile, items);
             TaskDB taskDB = TaskDB.getInstance(MainActivity.this);
+            taskDB.onRecreate();
+            tasks = new ArrayList<Task>();
             for (int i=0; i < items.size(); i++) {
                 Task task = new Task(items.get(i));
-                taskDB.setTask(task);//TODO: it does not save the list
+                tasks.add(task);
             }
+            taskDB.setTasks(tasks);
         } catch (Exception e) {
             e.printStackTrace();
         }

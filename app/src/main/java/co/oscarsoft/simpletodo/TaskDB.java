@@ -1,13 +1,15 @@
 package co.oscarsoft.simpletodo;
 
+import java.util.ArrayList;
+
 import android.content.ContentValues;
 import android.content.Context;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
-import android.util.Log;
 
-import java.util.ArrayList;
+
+
 
 public class TaskDB extends SQLiteOpenHelper {
 	private static TaskDB mInstance = null;
@@ -21,6 +23,7 @@ public class TaskDB extends SQLiteOpenHelper {
     // Contacts Table Columns names
     private static final String TASK_NAME = "task_name";
 
+
     public static TaskDB getInstance(Context ctx) {
     	if (mInstance == null) {
     		mInstance = new TaskDB(ctx.getApplicationContext());
@@ -28,11 +31,13 @@ public class TaskDB extends SQLiteOpenHelper {
     	return mInstance;
     }
 
+
     private TaskDB(Context ctx) {
         super(ctx, DB_NAME, null, DB_VERSION);
         this.mCtx = ctx;
     }
- 
+
+
     // Creating Tables
     @Override
     public void onCreate(SQLiteDatabase db) {
@@ -41,10 +46,21 @@ public class TaskDB extends SQLiteOpenHelper {
         		"("
         		+ TASK_NAME + " TEXT PRIMARY KEY"
         		+ ")";
-        //Log.d(DebugInfo.TAG, "TaskDB: onCreate: sql=" + CREATE_INFO_TABLE);
         db.execSQL(CREATE_TASK_TABLE);
     }
- 
+
+
+    public void onRecreate() {
+        SQLiteDatabase db = this.getWritableDatabase();
+
+        // Drop older table if existed
+        db.execSQL("DROP TABLE IF EXISTS " + DB_TABLE);
+
+        // Create tables again
+        onCreate(db);
+    }
+
+
     // Upgrading database
     @Override
     public void onUpgrade(SQLiteDatabase db, int oldVersion, int newVersion) {
@@ -55,8 +71,8 @@ public class TaskDB extends SQLiteOpenHelper {
         onCreate(db);
     }
 
+
     public ArrayList<Task> getTasks() {
-    	//Log.d(DebugInfo.TAG, "getTask")
         SQLiteDatabase db = this.getReadableDatabase();
         Cursor cursor = db.query(
                 DB_TABLE, //table name
@@ -68,6 +84,7 @@ public class TaskDB extends SQLiteOpenHelper {
                 null, //orderBy
                 null  //limit
         );
+
         if (cursor == null || cursor.getCount() == 0) {
             return null;
         }
@@ -82,13 +99,21 @@ public class TaskDB extends SQLiteOpenHelper {
         return tasks;
     }
 
-    public void setTask(Task task) {
-        SQLiteDatabase db = this.getWritableDatabase();
-        ContentValues values = new ContentValues();
-        values.put(TASK_NAME, task.getTaskName());
 
-        // Inserting Row
-        db.insert(DB_TABLE, null, values);
+    public void setTasks(ArrayList<Task> tasks) {
+        if (tasks.size() == 0) {
+            return; //do nothing
+        }
+
+        SQLiteDatabase db = this.getWritableDatabase();
+
+        for (int i=0; i < tasks.size(); i++) {
+            ContentValues values = new ContentValues();
+            Task task = tasks.get(i);
+            values.put(TASK_NAME, task.getTaskName());
+            // Inserting Row
+            db.insert(DB_TABLE, null, values);
+        }
         db.close(); // Closing database connection
     }
 }
