@@ -25,6 +25,7 @@ public class MainActivity extends AppCompatActivity {
     final static String filename = "todo.txt";
 
     ArrayList<String>       items;
+    ArrayList<Task>         tasks;
     ArrayAdapter<String>    itemsAdapter;
     ListView                lvItems;
 
@@ -89,22 +90,38 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private void readItems() {
-        File filesDir = getFilesDir();
+        /*File filesDir = getFilesDir();
         File todoFile = new File(filesDir, MainActivity.filename);
         try {
             items = new ArrayList<String>(FileUtils.readLines(todoFile));
         } catch (IOException ioe) {
             items = new ArrayList<String>();
+        }*/
+        TaskDB taskDB = TaskDB.getInstance(MainActivity.this);
+        tasks = taskDB.getTasks();
+        if (tasks.size() > 0) {
+            items = new ArrayList<String>();
+            for (int i=0; i < tasks.size(); i++) {
+                Task task = tasks.get(i);
+                items.add(task.getTaskName());
+            }
+        } else {
+            items = new ArrayList<String>();
         }
     }
 
     private void writeItems() {
-        File filesDir = getFilesDir();
-        File todoFile = new File(filesDir, MainActivity.filename);
+        //File filesDir = getFilesDir();
+        //File todoFile = new File(filesDir, MainActivity.filename);
         try {
-            FileUtils.writeLines(todoFile, items);
-        } catch (IOException ioe) {
-            ioe.printStackTrace();
+            //FileUtils.writeLines(todoFile, items);
+            TaskDB taskDB = TaskDB.getInstance(MainActivity.this);
+            for (int i=0; i < items.size(); i++) {
+                Task task = new Task(items.get(i));
+                taskDB.setTask(task);//TODO: it does not save the list
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
         }
     }
 

@@ -7,6 +7,8 @@ import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
 import android.util.Log;
 
+import java.util.ArrayList;
+
 public class TaskDB extends SQLiteOpenHelper {
 	private static TaskDB mInstance = null;
 
@@ -53,47 +55,38 @@ public class TaskDB extends SQLiteOpenHelper {
         onCreate(db);
     }
 
-    public Task getTask() {
-    	//Log.d(DebugInfo.TAG, "getTask");
+    public ArrayList<Task> getTasks() {
+    	//Log.d(DebugInfo.TAG, "getTask")
         SQLiteDatabase db = this.getReadableDatabase();
         Cursor cursor = db.query(
-        		DB_TABLE, //table name
-        		new String[] { TASK_NAME }, //columns
-        		null, //selection
+                DB_TABLE, //table name
+                new String[]{TASK_NAME}, //columns
+                null, //selection
                 null, //selectionArgs
                 null, //groupBy
                 null, //having
                 null, //orderBy
-                "1"   //limit
-        		);
-        if ((cursor != null) &&
-        	cursor.moveToFirst()) {
-        	//Log.d(DebugInfo.TAG, "getUser:    ID: " + cursor.getString(0));
-        	//Log.d(DebugInfo.TAG, "getUser: level: " + cursor.getInt(1));
-            Task task = new Task(cursor.getString(0));
-            db.close();
-            return task;
-        } else {
-        	db.close();
-        	return null;
+                null  //limit
+        );
+        if (cursor == null || cursor.getCount() == 0) {
+            return null;
         }
+
+        ArrayList<Task> tasks = new ArrayList<Task>();
+        while ((cursor != null) &&
+        	cursor.moveToNext()) {
+            Task task = new Task(cursor.getString(0));
+            tasks.add(task);
+        }
+        db.close();
+        return tasks;
     }
 
     public void setTask(Task task) {
-    	//Log.d(DebugInfo.TAG, "setUser");
-    	if (getTask() != null) {
-    		// if User has already been set, overwrite is not allowed
-    		//Log.d(DebugInfo.TAG, "setUser: User has already been set");
-    		return;
-    	}
-
         SQLiteDatabase db = this.getWritableDatabase();
         ContentValues values = new ContentValues();
         values.put(TASK_NAME, task.getTaskName());
-        //values.put(KEY_LEVEL, user.getLevel());
-        //Log.d(DebugInfo.TAG, "setUser:    ID: " + user.getId());
-        //Log.d(DebugInfo.TAG, "setUser: level: " + user.getLevel());
-     
+
         // Inserting Row
         db.insert(DB_TABLE, null, values);
         db.close(); // Closing database connection
